@@ -1,6 +1,6 @@
 CREATE TABLE "accounts" (
     "id" bigserial PRIMARY KEY,
-    "owner" serial NOT NULL,
+    "owner" text NOT NULL,
     "balance" bigint NOT NULL,
     "currency" text NOT NULL,
     "created_at" timestamptz NOT NULL DEFAULT (now())
