@@ -1,29 +1,44 @@
 package db
 
 import (
-	"database/sql"
+	"context"
 	"log"
 	"os"
 	"testing"
+	"time"
 
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
-	dbDriver = "postgres"
 	dbSource = "postgresql://golang:golang@localhost:5432/simple_bank?sslmode=disable"
 )
 
 var testQueries *Queries
+var testDB *pgxpool.Pool
 
 func TestMain(m *testing.M) {
-	conn, err := sql.Open(dbDriver, dbSource)
+	var err error
 
+	config, err := pgxpool.ParseConfig(dbSource)
 	if err != nil {
-		log.Fatal("cannot connect to db: " + err.Error())
+		log.Fatalf("Unable to parse connection string: %v", err)
 	}
 
-	testQueries = New(conn)
+	// Configure connection pool settings
+	config.MaxConns = 10                   // Set the maximum number of connections
+	config.MinConns = 1                    // Set the minimum number of connections
+	config.MaxConnLifetime = 0             // No maximum connection lifetime
+	config.MaxConnIdleTime = 0             // No maximum idle time
+	config.HealthCheckPeriod = time.Minute // No health check period
+
+	testDB, err = pgxpool.NewWithConfig(context.Background(), config)
+	if err != nil {
+		log.Fatalf("Unable to create connection pool: %v", err)
+	}
+	defer testDB.Close()
+
+	testQueries = New(testDB)
 
 	os.Exit(m.Run())
 }
