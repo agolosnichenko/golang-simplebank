@@ -30,7 +30,7 @@ func TestMain(m *testing.M) {
 	config.MinConns = 1                    // Set the minimum number of connections
 	config.MaxConnLifetime = 0             // No maximum connection lifetime
 	config.MaxConnIdleTime = 0             // No maximum idle time
-	config.HealthCheckPeriod = time.Minute // No health check period
+	config.HealthCheckPeriod = time.Minute // Set the health check period
 
 	testDB, err = pgxpool.NewWithConfig(context.Background(), config)
 	if err != nil {
