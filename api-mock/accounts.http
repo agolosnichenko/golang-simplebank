@@ -1,0 +1,26 @@
+###
+# Create new account
+# @name createAccount
+POST {{baseUrl}}/accounts
+Content-Type: application/json
+
+{
+    "owner": "Anton Golosnichenko",
+    "currency": "USD"
+}
+
+###
+# Get account by id
+# @name getAccount
+
+@accountId = 250
+
+GET {{baseUrl}}/accounts/{{accountId}}
+
+###
+# List all accounts
+# @name listAccounts
+
+@page_id = 1
+@page_size = 10
+GET {{baseUrl}}/accounts?page_id={{page_id}}&page_size={{page_size}}

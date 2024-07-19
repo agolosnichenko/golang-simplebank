@@ -1,0 +1,12 @@
+{
+    "rest-client.previewOption": "exchange",
+    "rest-client.defaultHeaders": {
+        "User-Agent": "vscode-restclient"
+    },
+    "rest-client.environmentVariables": {
+        "$shared": {
+            "baseUrl": "http://localhost:8080"
+        },
+        "local": {},
+    },
+}
