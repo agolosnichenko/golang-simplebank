@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/agolosnichenko/simplebank/util"
+	"github.com/agolosnichenko/golang-simplebank/simplebank/util"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

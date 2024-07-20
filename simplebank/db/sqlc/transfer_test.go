@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/agolosnichenko/simplebank/util"
+	"github.com/agolosnichenko/golang-simplebank/simplebank/util"
 	"github.com/stretchr/testify/require"
 )
 

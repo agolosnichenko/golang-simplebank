@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/agolosnichenko/simplebank/api"
-	db "github.com/agolosnichenko/simplebank/db/sqlc"
-	"github.com/agolosnichenko/simplebank/util"
+	"github.com/agolosnichenko/golang-simplebank/simplebank/api"
+	db "github.com/agolosnichenko/golang-simplebank/simplebank/db/sqlc"
+	"github.com/agolosnichenko/golang-simplebank/simplebank/util"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

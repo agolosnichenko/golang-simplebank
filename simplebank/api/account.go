@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	db "github.com/agolosnichenko/simplebank/db/sqlc"
+	db "github.com/agolosnichenko/golang-simplebank/simplebank/db/sqlc"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 )
