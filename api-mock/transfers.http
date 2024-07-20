@@ -1,0 +1,18 @@
+###
+# Create new transfer
+# @name createTransfer
+
+@fromAccountId = 276
+@toAccountId = 277
+@amount = 100
+@currency = "USD"
+
+POST {{baseUrl}}/transfers
+Content-Type: application/json
+
+{
+    "from_account_id": {{fromAccountId}},
+    "to_account_id": {{toAccountId}},
+    "amount": {{amount}},
+    "currency": {{currency}}
+}
