@@ -10,3 +10,14 @@ Content-Type: application/json
     "email": "anton@icloud.com",
     "password": "secret"
 }
+
+###
+# Login user
+# @name loginUser
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+    "username": "anton2",
+    "password": "secret"
+}
