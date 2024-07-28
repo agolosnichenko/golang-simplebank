@@ -1,8 +1,28 @@
-version: "3.9"
+name: simplebank
 
 services:
+  api:
+    build:
+      context: ./simplebank
+      dockerfile: Dockerfile
+    container_name: simplebank-api
+    depends_on:
+      - postgres
+    networks:
+      - bank-network
+    ports:
+      - 8080:8080
+    environment:
+      - GIN_MODE=release
+      - DB_SOURCE=postgresql://golang:golang@simplebank-db:5432/simple_bank?sslmode=disable
+    entrypoint: ["/app/wait-for.sh", "simplebank-db:5432", "--", "/app/start.sh"]
+    command: ["/app/main"]
+
   postgres:
     image: postgres:15
+    container_name: simplebank-db
+    networks:
+      - bank-network
     ports:
       - 5432:5432
     volumes:
@@ -11,4 +31,8 @@ services:
       - POSTGRES_PASSWORD=golang
       - POSTGRES_USER=golang
       - POSTGRES_DB=simple_bank
+
+networks:
+  bank-network:
+    driver: bridge
  
