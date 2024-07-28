@@ -1,11 +1,24 @@
 ###
+# Login user
+# @name loginUser
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+    "username": "anton2",
+    "password": "secret"
+}
+
+@accessToken = {{loginUser.response.body.access_token}}
+
+###
 # Create new account
 # @name createAccount
 POST {{baseUrl}}/accounts
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
-    "owner": "Anton Golosnichenko",
     "currency": "USD"
 }
 
@@ -13,9 +26,11 @@ Content-Type: application/json
 # Get account by id
 # @name getAccount
 
-@accountId = 250
+@accountId = 114
 
 GET {{baseUrl}}/accounts/{{accountId}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 ###
 # List all accounts
@@ -24,3 +39,5 @@ GET {{baseUrl}}/accounts/{{accountId}}
 @page_id = 1
 @page_size = 10
 GET {{baseUrl}}/accounts?page_id={{page_id}}&page_size={{page_size}}
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}

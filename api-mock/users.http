@@ -21,3 +21,5 @@ Content-Type: application/json
     "username": "anton2",
     "password": "secret"
 }
+
+@accessToken = {{loginUser.response.body.access_token}}
