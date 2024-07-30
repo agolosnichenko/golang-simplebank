@@ -23,3 +23,14 @@ Content-Type: application/json
 }
 
 @accessToken = {{loginUser.response.body.access_token}}
+
+###
+# Renew token
+# @name renewToken
+
+POST {{baseUrl}}/tokens/renew_access
+Content-Type: application/json
+
+{
+    "refresh_token": "{{loginUser.response.body.refresh_token}}"
+}

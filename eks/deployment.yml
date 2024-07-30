@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: simple-bank-api-deloyment
+  name: simple-bank-api-deployment
   labels:
     app: simple-bank-api
 spec:
