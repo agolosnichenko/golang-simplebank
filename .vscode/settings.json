@@ -4,9 +4,12 @@
         "User-Agent": "vscode-restclient"
     },
     "rest-client.environmentVariables": {
-        "$shared": {
+        "$shared": {},
+        "local": {
             "baseUrl": "http://localhost:8080"
         },
-        "local": {},
+        "prod": {
+            "baseUrl": "https://api.simple-bank-demo.org"
+        }
     },
 }
