@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install kubectl
-    - uses: azure/setup-kubectl@v3
+      uses: azure/setup-kubectl@v3
       with:
         version: 'v1.30.3' # default is latest stable
       id: install-kubectl
