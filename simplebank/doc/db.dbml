@@ -1,0 +1,68 @@
+Project simple_bank {
+    database_type: "PostgreSQL"
+    Note: '''
+        # Simple Bank Database
+    '''
+}
+
+Table accounts as A {
+  id bigserial [pk]
+  owner text [not null, ref: > U.username]
+  balance bigint [not null]
+  currency text [not null]
+  created_at timestamptz [not null, default: `now()`]
+
+  indexes {
+        (owner, currency) [name: "owner_currency_key", unique]
+        owner [name: 'accounts_owner_idx']
+    }
+}
+
+Table entries {
+  id bigint [pk]
+  account_id bigint [not null, ref: > accounts.id]
+  amount bigint [not null, note: "can be negative or positive"]
+  created_at timestamptz [not null, default: `now()`]
+
+  indexes {
+        account_id [name: 'entries_account_id_idx']
+    }
+}
+
+Table transfers {
+  id bigint PK
+  from_account_id bigint [not null, ref: > accounts.id]
+  to_account_id bigint [not null, ref: > accounts.id]
+  amount bigint [not null, note: 'must be positive']
+  created_at timestamptz [not null, default: `now()`]
+
+  indexes {
+        from_account_id [name: 'transfers_from_account_id_idx']
+        to_account_id [name: 'transfers_to_account_id_idx']
+        (from_account_id, to_account_id) [name: "transfers_from_account_id_to_account_id_idx"]
+    }
+}
+
+Table users as U {
+  username text [pk]
+  hashed_password text [not null]
+  full_name text [not null]
+  email text [unique, not null]
+  password_changed_at timestamptz [not null, default: "0001-01-01"]
+  created_at timestamptz [not null, default: `now()`]
+
+  indexes {
+    email [name: "users_email_key"]
+  }
+}
+
+Table sessions {
+  id uuid PK
+  username string [not null, ref: > users.username]
+  refresh_token text [not null]
+  user_agent text [not null]
+  client_ip text [not null]
+  is_blocked boolean [not null, default: false]
+  expires_at timestamptz [not null]
+  created_at timestamptz [not null, default: `now()`]
+}
