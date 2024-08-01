@@ -30,4 +30,10 @@ server:
 mock:
 	mockgen -package mockdb --build_flags=--mod=mod -destination db/mock/store.go github.com/agolosnichenko/golang-simplebank/simplebank/db/sqlc Store
 
-.PHONY: migrateup migrateup1 migratedown migratedown1 sqlc test server mock db_docs db_schema
+proto:
+	rm -f pb/*.go
+	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
+    --go-grpc_out=pb --go-grpc_opt=paths=source_relative \
+    proto/*.proto
+
+.PHONY: migrateup migrateup1 migratedown migratedown1 sqlc test server mock db_docs db_schema proto

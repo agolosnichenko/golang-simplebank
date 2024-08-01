@@ -12,4 +12,9 @@
             "baseUrl": "https://api.simple-bank-demo.org"
         }
     },
+    "protoc": {
+        "options": [
+            "--proto_path=${workspaceRoot}/simplebank/proto"
+        ]
+    }
 }
