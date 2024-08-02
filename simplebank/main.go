@@ -9,11 +9,13 @@ import (
 
 	"github.com/agolosnichenko/golang-simplebank/simplebank/api"
 	db "github.com/agolosnichenko/golang-simplebank/simplebank/db/sqlc"
+	_ "github.com/agolosnichenko/golang-simplebank/simplebank/doc/statik"
 	"github.com/agolosnichenko/golang-simplebank/simplebank/gapi"
 	"github.com/agolosnichenko/golang-simplebank/simplebank/pb"
 	"github.com/agolosnichenko/golang-simplebank/simplebank/util"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rakyll/statik/fs"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -99,8 +101,12 @@ func runGatewayServer(config util.Config, store db.Store) {
 	mux := http.NewServeMux()
 	mux.Handle("/", grpcMux)
 
-	fs := http.FileServer(http.Dir("./doc/swagger"))
-	mux.Handle("/swagger/", http.StripPrefix("/swagger/", fs))
+	statikFS, err := fs.New()
+	if err != nil {
+		log.Fatalf("cannot create statik fs: %v", err)
+	}
+	swaggerHandler := http.StripPrefix("/swagger/", http.FileServer(statikFS))
+	mux.Handle("/swagger/", swaggerHandler)
 
 	listener, err := net.Listen("tcp", config.HTTPServerAddress)
 
