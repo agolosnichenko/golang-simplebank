@@ -1,0 +1,23 @@
+###
+# Create new user
+# @name gRPCGatewayCreateUser
+POST {{baseUrl}}/v1/create_user
+Content-Type: application/json
+
+{
+    "username": "anton2",
+    "full_name": "Anton Golosnichenko",
+    "email": "anton@icloud.com",
+    "password": "secret"
+}
+
+###
+# Login user
+# @name gRPCGatewayLoginUser
+POST {{baseUrl}}/v1/login_user
+Content-Type: application/json
+
+{
+    "username": "anton2",
+    "password": "secret"
+}
