@@ -6,6 +6,7 @@ import (
 
 	db "github.com/agolosnichenko/golang-simplebank/simplebank/db/sqlc"
 	"github.com/agolosnichenko/golang-simplebank/simplebank/util"
+	"github.com/emicklei/pgtalk/convert"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -122,25 +123,14 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	var sessionID pgtype.UUID
-	if err := sessionID.Scan(refreshPayload.ID); err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-	var expiresAt pgtype.Timestamptz
-	if err := expiresAt.Scan(refreshPayload.ExpiresAt.Time); err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		return
-	}
-
 	session, err := server.store.CreateSession(ctx, db.CreateSessionParams{
-		ID:           sessionID,
+		ID:           convert.StringToUUID(refreshPayload.ID),
 		Username:     user.Username,
 		RefreshToken: refreshToken,
 		UserAgent:    ctx.Request.UserAgent(),
 		ClientIp:     ctx.ClientIP(),
 		IsBlocked:    false,
-		ExpiresAt:    expiresAt,
+		ExpiresAt:    convert.TimeToTimestamptz(refreshPayload.ExpiresAt.Time),
 	})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
