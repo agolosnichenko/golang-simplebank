@@ -10,6 +10,7 @@ import (
 // The values are read by viper from a config file or environment variables.
 type Config struct {
 	DbSource            string        `mapstructure:"DB_SOURCE"`
+	MigrationUrl        string        `mapstructure:"MIGRATION_URL"`
 	HTTPServerAddress   string        `mapstructure:"HTTP_SERVER_ADDRESS"`
 	GRPCServerAddress   string        `mapstructure:"GRPC_SERVER_ADDRESS"`
 	TokenSymmetricKey   string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
