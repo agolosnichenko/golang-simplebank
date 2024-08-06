@@ -12,6 +12,17 @@ Content-Type: application/json
 }
 
 ###
+# Update user
+# @name gRPCGatewayUpdateUser
+PATCH {{baseUrl}}/v1/update_user
+Content-Type: application/json
+
+{
+    "username": "anton2",
+    "password": "123234"
+}
+
+###
 # Login user
 # @name gRPCGatewayLoginUser
 POST {{baseUrl}}/v1/login_user
