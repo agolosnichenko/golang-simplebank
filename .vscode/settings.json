@@ -16,5 +16,10 @@
         "options": [
             "--proto_path=${workspaceRoot}/simplebank/proto"
         ]
-    }
+    },
+    "go.testFlags": [
+        "-v",
+        "-count=1",
+        "-short"
+    ]
 }
