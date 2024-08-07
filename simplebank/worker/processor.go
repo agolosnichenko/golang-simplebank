@@ -4,6 +4,7 @@ import (
 	"context"
 
 	db "github.com/agolosnichenko/golang-simplebank/simplebank/db/sqlc"
+	"github.com/agolosnichenko/golang-simplebank/simplebank/mail"
 	"github.com/hibiken/asynq"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
@@ -22,9 +23,10 @@ type TaskProcessor interface {
 type RedisTaskProcessor struct {
 	server *asynq.Server
 	store  db.Store
+	mailer mail.EmailSender
 }
 
-func NewRedisTaskProcessor(redisOpts asynq.RedisClientOpt, store db.Store) TaskProcessor {
+func NewRedisTaskProcessor(redisOpts asynq.RedisClientOpt, store db.Store, mailer mail.EmailSender) TaskProcessor {
 	logger := NewLogger()
 
 	redis.SetLogger(logger)
@@ -49,6 +51,7 @@ func NewRedisTaskProcessor(redisOpts asynq.RedisClientOpt, store db.Store) TaskP
 	return &RedisTaskProcessor{
 		server: server,
 		store:  store,
+		mailer: mailer,
 	}
 }
 

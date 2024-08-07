@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	db "github.com/agolosnichenko/golang-simplebank/simplebank/db/sqlc"
+	"github.com/agolosnichenko/golang-simplebank/simplebank/util"
 	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5"
 	"github.com/rs/zerolog/log"
@@ -50,7 +52,25 @@ func (processor *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Cont
 		return fmt.Errorf("failed to get user: %w", err)
 	}
 
-	// TODO: Send verification email to user
+	verifyEmail, err := processor.store.CreateVerifyEmail(ctx, db.CreateVerifyEmailParams{
+		Username:   user.Username,
+		Email:      user.Email,
+		SecretCode: util.RandomString(32),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create verify email: %w", err)
+	}
+
+	subject := "Welcome to Simple Bank!"
+	verifyUrl := fmt.Sprintf("http://simplebankdemo.org/verify_email?id=%d&secret_code=%s", verifyEmail.ID, verifyEmail.SecretCode)
+	content := fmt.Sprintf(`Hello %s,<br/>
+	Thank you for signing up for Simple Bank! <br/>
+	To verify your email address, please <a href="%s" target="_blank">click here</a>.`, user.FullName, verifyUrl)
+	to := []string{user.Email}
+
+	if err = processor.mailer.SendEmail(subject, content, to, nil, nil, nil); err != nil {
+		return fmt.Errorf("failed to send email: %w", err)
+	}
 
 	log.Info().
 		Str("type", task.Type()).

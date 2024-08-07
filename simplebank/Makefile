@@ -12,6 +12,9 @@ migratedown:
 migratedown1:
 	migrate -path ./db/migration -database "$(DB_URL)" down 1
 
+new_migration:
+	migrate create -ext sql -dir db/migration -seq $(name)
+
 db_docs:
 	dbdocs build doc/db.dbml
 
@@ -43,4 +46,4 @@ proto:
 evans:
 	evans --host localhost --port 9090 -r repl
 
-.PHONY: migrateup migrateup1 migratedown migratedown1 sqlc test server mock db_docs db_schema proto evans
+.PHONY: migrateup migrateup1 migratedown migratedown1 new_migration sqlc test server mock db_docs db_schema proto evans
