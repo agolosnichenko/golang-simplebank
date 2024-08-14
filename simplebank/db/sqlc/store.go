@@ -3,9 +3,6 @@ package db
 import (
 	"context"
 
-	"fmt"
-
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -20,42 +17,13 @@ type Store interface {
 // SQLStore provides all functions to execute SQL queries and transactions
 type SQLStore struct {
 	*Queries
-	db *pgxpool.Pool
+	connPool *pgxpool.Pool
 }
 
 // NewStore creates a new Store
-func NewStore(db *pgxpool.Pool) Store {
+func NewStore(connPool *pgxpool.Pool) Store {
 	return &SQLStore{
-		db:      db,
-		Queries: New(db),
+		connPool: connPool,
+		Queries:  New(connPool),
 	}
-}
-
-// execTx executes a function within a database transaction
-func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
-	conn, err := store.db.Acquire(ctx)
-	if err != nil {
-		return fmt.Errorf("unable to acquire connection: %w", err)
-	}
-	defer conn.Release()
-
-	tx, err := conn.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return fmt.Errorf("unable to begin transaction: %w", err)
-	}
-
-	q := New(tx)
-	err = fn(q)
-	if err != nil {
-		if rbErr := tx.Rollback(ctx); rbErr != nil {
-			return fmt.Errorf("tx error: %v, rb error: %v", err, rbErr)
-		}
-		return err
-	}
-
-	if err = tx.Commit(ctx); err != nil {
-		return fmt.Errorf("commit failed: %w", err)
-	}
-
-	return nil
 }

@@ -21,7 +21,7 @@ func createRandomUser(t *testing.T) User {
 		Email:          util.RandomEmail(),
 	}
 
-	user, err := testQueries.CreateUser(context.Background(), arg)
+	user, err := testStore.CreateUser(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
 
@@ -42,7 +42,7 @@ func TestCreateUser(t *testing.T) {
 
 func TestGetUser(t *testing.T) {
 	user1 := createRandomUser(t)
-	user2, err := testQueries.GetUser(context.Background(), user1.Username)
+	user2, err := testStore.GetUser(context.Background(), user1.Username)
 
 	require.NoError(t, err)
 	require.NotEmpty(t, user2)
@@ -59,7 +59,7 @@ func TestUpdateUserOnlyFullName(t *testing.T) {
 
 	newFullName := util.RandomOwner()
 
-	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
+	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: oldUser.Username,
 		FullName: convert.StringToText(newFullName),
 	})
@@ -76,7 +76,7 @@ func TestUpdateUserOnlyEmail(t *testing.T) {
 
 	newEmail := util.RandomEmail()
 
-	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
+	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: oldUser.Username,
 		Email:    convert.StringToText(newEmail),
 	})
@@ -95,7 +95,7 @@ func TestUpdateUserOnlyPassword(t *testing.T) {
 	hashedPassword, err := util.HashPassword(newPassword)
 	require.NoError(t, err)
 
-	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
+	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username:       oldUser.Username,
 		HashedPassword: convert.StringToText(hashedPassword),
 	})
@@ -117,7 +117,7 @@ func TestUpdateUserAllFields(t *testing.T) {
 	hashedPassword, err := util.HashPassword(newPassword)
 	require.NoError(t, err)
 
-	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
+	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username:       oldUser.Username,
 		FullName:       convert.StringToText(newFullName),
 		Email:          convert.StringToText(newEmail),

@@ -12,7 +12,6 @@ import (
 	"github.com/agolosnichenko/golang-simplebank/simplebank/token"
 	"github.com/agolosnichenko/golang-simplebank/simplebank/util"
 	"github.com/golang/mock/gomock"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
@@ -88,7 +87,7 @@ func TestUpdateUserAPI(t *testing.T) {
 				store.EXPECT().
 					UpdateUser(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(db.User{}, pgx.ErrNoRows)
+					Return(db.User{}, db.ErrRecordNotFound)
 
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {

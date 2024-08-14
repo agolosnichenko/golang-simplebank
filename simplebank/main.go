@@ -5,7 +5,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog"
@@ -40,27 +39,15 @@ func main() {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	}
 
-	dbConfig, err := pgxpool.ParseConfig(config.DbSource)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Unable to parse connection string")
-	}
-
-	// Configure connection pool settings
-	dbConfig.MaxConns = 10                   // Set the maximum number of connections
-	dbConfig.MinConns = 1                    // Set the minimum number of connections
-	dbConfig.MaxConnLifetime = 0             // No maximum connection lifetime
-	dbConfig.MaxConnIdleTime = 0             // No maximum idle time
-	dbConfig.HealthCheckPeriod = time.Minute // Set the health check period
-
-	conn, err := pgxpool.NewWithConfig(context.Background(), dbConfig)
+	connPool, err := pgxpool.New(context.Background(), config.DbSource)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unable to create connection pool")
 	}
-	defer conn.Close()
+	defer connPool.Close()
 
 	runDbMigration(config.MigrationUrl, config.DbSource)
 
-	store := db.NewStore(conn)
+	store := db.NewStore(connPool)
 
 	redisOpts := asynq.RedisClientOpt{
 		Addr: config.RedisAddress,

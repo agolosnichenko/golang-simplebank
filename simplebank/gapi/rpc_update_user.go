@@ -2,6 +2,7 @@ package gapi
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	db "github.com/agolosnichenko/golang-simplebank/simplebank/db/sqlc"
@@ -9,7 +10,6 @@ import (
 	"github.com/agolosnichenko/golang-simplebank/simplebank/util"
 	"github.com/agolosnichenko/golang-simplebank/simplebank/val"
 	"github.com/emicklei/pgtalk/convert"
-	"github.com/jackc/pgx/v5"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -55,7 +55,7 @@ func (server *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 
 	user, err := server.store.UpdateUser(ctx, arg)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, db.ErrRecordNotFound) {
 			return nil, status.Errorf(codes.NotFound, "user not found: %s", err)
 		}
 		return nil, status.Errorf(codes.Internal, "failed to update user: %s", err)
