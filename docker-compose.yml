@@ -8,13 +8,16 @@ services:
     container_name: simplebank-api
     depends_on:
       - postgres
+      - redis
     networks:
       - bank-network
     ports:
       - 8080:8080
+      - 9090:9090
     environment:
       - GIN_MODE=release
       - DB_SOURCE=postgresql://golang:golang@simplebank-db:5432/simple_bank?sslmode=disable
+      - REDIS_ADDRESS=simplebank-redis:6379
     entrypoint: ["/app/wait-for.sh", "simplebank-db:5432", "--", "/app/start.sh"]
     command: ["/app/main"]
 
