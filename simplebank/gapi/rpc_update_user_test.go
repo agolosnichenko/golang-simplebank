@@ -19,7 +19,8 @@ import (
 )
 
 func TestUpdateUserAPI(t *testing.T) {
-	user, _ := randomUser(t)
+	depositorUser, _ := randomUser(t, util.DepositorRole)
+	bankerUser, _ := randomUser(t, util.BankerRole)
 
 	newName := util.RandomOwner()
 	newEmail := util.RandomEmail()
@@ -35,27 +36,27 @@ func TestUpdateUserAPI(t *testing.T) {
 		checkResponse func(t *testing.T, res *pb.UpdateUserResponse, err error)
 	}{
 		{
-			name: "OK",
+			name: "OK-Depositor",
 			req: &pb.UpdateUserRequest{
-				Username: user.Username,
+				Username: depositorUser.Username,
 				FullName: &newName,
 				Email:    &newEmail,
 			},
 			buildStub: func(store *mockdb.MockStore) {
 				args := db.UpdateUserParams{
-					Username: user.Username,
+					Username: depositorUser.Username,
 					FullName: pgtype.Text{String: newName, Valid: true},
 					Email:    pgtype.Text{String: newEmail, Valid: true},
 				}
 
 				updatedUser := db.User{
-					Username:          user.Username,
-					HashedPassword:    user.HashedPassword,
+					Username:          depositorUser.Username,
+					HashedPassword:    depositorUser.HashedPassword,
 					FullName:          newName,
 					Email:             newEmail,
-					PasswordChangedAt: user.PasswordChangedAt,
-					CreatedAt:         user.CreatedAt,
-					IsEmailVerified:   user.IsEmailVerified,
+					PasswordChangedAt: depositorUser.PasswordChangedAt,
+					CreatedAt:         depositorUser.CreatedAt,
+					IsEmailVerified:   depositorUser.IsEmailVerified,
 				}
 
 				store.EXPECT().
@@ -65,13 +66,55 @@ func TestUpdateUserAPI(t *testing.T) {
 
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return newContextWithBearerToken(t, tokenMaker, user.Username, time.Minute)
+				return newContextWithBearerToken(t, tokenMaker, depositorUser.Username, depositorUser.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.NoError(t, err)
 				require.NotNil(t, res)
 				updatedUser := res.User
-				require.Equal(t, user.Username, updatedUser.Username)
+				require.Equal(t, depositorUser.Username, updatedUser.Username)
+				require.Equal(t, newEmail, updatedUser.Email)
+				require.Equal(t, newName, updatedUser.FullName)
+			},
+		},
+		{
+			name: "OK-Banker",
+			req: &pb.UpdateUserRequest{
+				Username: depositorUser.Username,
+				FullName: &newName,
+				Email:    &newEmail,
+			},
+			buildStub: func(store *mockdb.MockStore) {
+				args := db.UpdateUserParams{
+					Username: depositorUser.Username,
+					FullName: pgtype.Text{String: newName, Valid: true},
+					Email:    pgtype.Text{String: newEmail, Valid: true},
+				}
+
+				updatedUser := db.User{
+					Username:          depositorUser.Username,
+					HashedPassword:    depositorUser.HashedPassword,
+					FullName:          newName,
+					Email:             newEmail,
+					PasswordChangedAt: depositorUser.PasswordChangedAt,
+					CreatedAt:         depositorUser.CreatedAt,
+					IsEmailVerified:   depositorUser.IsEmailVerified,
+				}
+
+				store.EXPECT().
+					UpdateUser(gomock.Any(), gomock.Eq(args)).
+					Times(1).
+					Return(updatedUser, nil)
+
+			},
+			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
+				return newContextWithBearerToken(t, tokenMaker, bankerUser.Username, bankerUser.Role, time.Minute)
+			},
+			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
+				require.NoError(t, err)
+				require.NotNil(t, res)
+				updatedUser := res.User
+				require.Equal(t, depositorUser.Username, updatedUser.Username)
 				require.Equal(t, newEmail, updatedUser.Email)
 				require.Equal(t, newName, updatedUser.FullName)
 			},
@@ -79,7 +122,7 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name: "UserNotFound",
 			req: &pb.UpdateUserRequest{
-				Username: user.Username,
+				Username: depositorUser.Username,
 				FullName: &newName,
 				Email:    &newEmail,
 			},
@@ -91,7 +134,7 @@ func TestUpdateUserAPI(t *testing.T) {
 
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return newContextWithBearerToken(t, tokenMaker, user.Username, time.Minute)
+				return newContextWithBearerToken(t, tokenMaker, depositorUser.Username, depositorUser.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)
@@ -103,7 +146,7 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name: "ExpiredToken",
 			req: &pb.UpdateUserRequest{
-				Username: user.Username,
+				Username: depositorUser.Username,
 				FullName: &newName,
 				Email:    &newEmail,
 			},
@@ -114,7 +157,7 @@ func TestUpdateUserAPI(t *testing.T) {
 
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return newContextWithBearerToken(t, tokenMaker, user.Username, -time.Minute)
+				return newContextWithBearerToken(t, tokenMaker, depositorUser.Username, depositorUser.Role, -time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)
@@ -126,7 +169,7 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name: "NoAuthorization",
 			req: &pb.UpdateUserRequest{
-				Username: user.Username,
+				Username: depositorUser.Username,
 				FullName: &newName,
 				Email:    &newEmail,
 			},
@@ -160,7 +203,7 @@ func TestUpdateUserAPI(t *testing.T) {
 
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return newContextWithBearerToken(t, tokenMaker, user.Username, time.Minute)
+				return newContextWithBearerToken(t, tokenMaker, depositorUser.Username, depositorUser.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)
@@ -172,7 +215,7 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name: "InvalidEmail",
 			req: &pb.UpdateUserRequest{
-				Username: user.Username,
+				Username: depositorUser.Username,
 				FullName: &newName,
 				Email:    &invalidEmail,
 			},
@@ -183,7 +226,7 @@ func TestUpdateUserAPI(t *testing.T) {
 
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return newContextWithBearerToken(t, tokenMaker, user.Username, time.Minute)
+				return newContextWithBearerToken(t, tokenMaker, depositorUser.Username, depositorUser.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)
@@ -206,7 +249,7 @@ func TestUpdateUserAPI(t *testing.T) {
 
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return newContextWithBearerToken(t, tokenMaker, user.Username, time.Minute)
+				return newContextWithBearerToken(t, tokenMaker, depositorUser.Username, depositorUser.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)
@@ -218,7 +261,7 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name: "InvalidFullname",
 			req: &pb.UpdateUserRequest{
-				Username: user.Username,
+				Username: depositorUser.Username,
 				FullName: &invalidFullName,
 				Email:    &newEmail,
 			},
@@ -229,7 +272,7 @@ func TestUpdateUserAPI(t *testing.T) {
 
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return newContextWithBearerToken(t, tokenMaker, user.Username, time.Minute)
+				return newContextWithBearerToken(t, tokenMaker, depositorUser.Username, depositorUser.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)
@@ -241,7 +284,7 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name: "InvalidPassword",
 			req: &pb.UpdateUserRequest{
-				Username: user.Username,
+				Username: depositorUser.Username,
 				FullName: &newName,
 				Email:    &newEmail,
 				Password: &invalidPassword,
@@ -253,7 +296,7 @@ func TestUpdateUserAPI(t *testing.T) {
 
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return newContextWithBearerToken(t, tokenMaker, user.Username, time.Minute)
+				return newContextWithBearerToken(t, tokenMaker, depositorUser.Username, depositorUser.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)
@@ -265,7 +308,7 @@ func TestUpdateUserAPI(t *testing.T) {
 		{
 			name: "InternalError",
 			req: &pb.UpdateUserRequest{
-				Username: user.Username,
+				Username: depositorUser.Username,
 				FullName: &newName,
 				Email:    &newEmail,
 			},
@@ -277,7 +320,7 @@ func TestUpdateUserAPI(t *testing.T) {
 
 			},
 			buildContext: func(t *testing.T, tokenMaker token.Maker) context.Context {
-				return newContextWithBearerToken(t, tokenMaker, user.Username, time.Minute)
+				return newContextWithBearerToken(t, tokenMaker, depositorUser.Username, depositorUser.Role, time.Minute)
 			},
 			checkResponse: func(t *testing.T, res *pb.UpdateUserResponse, err error) {
 				require.Error(t, err)

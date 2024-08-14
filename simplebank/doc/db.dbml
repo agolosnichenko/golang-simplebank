@@ -45,6 +45,7 @@ Table transfers {
 
 Table users as U {
   username text [pk]
+  role text [not null, default: 'depositor']
   hashed_password text [not null]
   full_name text [not null]
   email text [unique, not null]
